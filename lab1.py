@@ -1,25 +1,36 @@
 # coding=utf-8
-from unittest.mock import right
 
 __author__ = 'ees'
 
 import random
-import math
 
-
-def powmod(b, e, n):
+def powmod(a, p, m):
+    """
+    Процедура возведения a в степень p по модулю m,
+    реализующая алгоритм быстрого возведения в степень
+    :param a: Число, возводимое в степень
+    :param p: Степень
+    :param m: Модуль
+    :return: A ^ P % M
+    """
     accum = 1
     i = 0
-    bpow2 = b
-    while (e >> i) > 0:
-        if (e >> i) & 1:
-            accum = (accum * bpow2) % n
-        bpow2 = (bpow2 * bpow2) % n
+    bpow2 = a
+    while (p >> i) > 0:
+        if (p >> i) & 1:
+            accum = (accum * bpow2) % m
+        bpow2 = (bpow2 * bpow2) % m
         i += 1
     return accum
 
 
 def fact_mod(n, m):
+    """
+    Процедура вычисления факториала числа n по модулю m
+    :param n: Аргумент факториала
+    :param m: модуль
+    :return: факториал по модулю m
+    """
     tmp = 1
     for i in range(1, n + 1):
         tmp = (tmp * i) % m
@@ -27,14 +38,27 @@ def fact_mod(n, m):
 
 
 def is_prime(n):
+    """
+    Процедура проверки числа на простоту, с помощью теоремы Вильсона
+    :param n: Проверяемое число
+    :return: результат проверки на простоту
+    """
     if n <= 1:
         return False
     return fact_mod(n - 1, n) == n - 1
 
 
 class GOSTGenerator:
+    """
+    Класс, реализующий алгоритм генерации параметров p, q, a по ГОСТ-34.10-94
+    """
     @staticmethod
     def __calculate_t(t0=510):
+        """
+        Генерация списка размеров T
+        :param t0: Максимальный размер числа
+        :return: список размеров T
+        """
 
         t = [t0]
 
@@ -46,6 +70,11 @@ class GOSTGenerator:
 
     @staticmethod
     def __next_prime(s):
+        """
+        Процедура получения наименьшего простого числа заданного размера
+        :param s: Размер получаемого числа в битах
+        :return: Наименьшее простое число заданного размера
+        """
         if s <= 0:
             raise RuntimeError('NextPrime: S should be greater than zero!')
 
@@ -57,8 +86,17 @@ class GOSTGenerator:
 
     @staticmethod
     def __generate_z(y0, c, size):
+        """
+        Процедура генерации промежуточного параметра Z
+        :param y0: Начальное значение последовательности y
+        :param c: Параметр генерации c
+        :param size: размер последовательности
+        :return: Z, X0
+        """
+
         if size <= 0:
             raise RuntimeError("Generate Z: size should be greater than zero!")
+
         y = [y0] * size
         for i in range(1, size):
             y[i] = (19381 * y[i - 1] + c) % 2 ** 16
@@ -70,6 +108,13 @@ class GOSTGenerator:
 
 
     def __a(self, x0, c, t):
+        """
+        Процедура A
+        :param x0: Первый параметр конгруэнтного генератора
+        :param c: Второй параметр конгруэнтного генератора
+        :param t: Битность генерируемого числа p 510 <= t <= 512
+        :return: Сгенерированные числа p, q
+        """
         if c >= 2 ** 16 or c <= 0 or \
                         x0 >= 2 ** 16 or x0 <= 0:
             return -1
@@ -85,7 +130,7 @@ class GOSTGenerator:
             d, r = divmod(t_list[m - 1], 16)
             rm = d if r == 0 else d + 1
 
-            p[m - 1] = 2 ** (t + 1)
+            p[m - 1] = 2 ** (t + 1)  # Дабы цикл отработал хотя бы разок
             while p[m - 1] > 2 ** t:
                 z, y0 = self.__generate_z(y0, c, rm)
 
@@ -118,14 +163,25 @@ class GOSTGenerator:
 
     @staticmethod
     def __c(p, q):
-        f = 1
-        while f == 1:
+        """
+        Процедура C
+        :param p: Сгенерированное процедурой A число P
+        :param q: Сгенерированное процедурой A число Q
+        :return: Число \alpha: \alpha ^ q mod p = 1
+        """
+        a = 1
+        while a == 1:
             d = random.randint(2, p - 2)
-            f = powmod(d, (p - 1) // q, p)
-        return f
+            a = powmod(d, (p - 1) // q, p)
+        return a
 
 
     def generate_p_q_a(self, t):
+        """
+        Процедура генерации p, q, a
+        :param t: Битность p
+        :return: p, q, a
+        """
         x0 = random.randint(0, 2 ** 16 - 1)
         c = random.randint(0, 2 ** 16 - 1)
         p, q = self.__a(x0, c, t)
