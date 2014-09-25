@@ -1,4 +1,5 @@
 # coding=utf-8
+from unittest.mock import right
 
 __author__ = 'ees'
 
@@ -32,7 +33,6 @@ def is_prime(n):
 
 
 class GOSTGenerator:
-
     @staticmethod
     def __calculate_t(t0=510):
 
@@ -71,8 +71,8 @@ class GOSTGenerator:
 
     def __a(self, x0, c, t):
         if c >= 2 ** 16 or c <= 0 or \
-           x0 >= 2 ** 16 or x0 <= 0:
-              return -1
+                        x0 >= 2 ** 16 or x0 <= 0:
+            return -1
 
         t_list, s = self.__calculate_t(t)
         p_s = self.__next_prime(t_list[s - 1])
@@ -82,13 +82,19 @@ class GOSTGenerator:
         y0 = x0
 
         while m > 0:
-            rm = math.ceil(t_list[m - 1] / 16)
+            d, r = divmod(t_list[m - 1], 16)
+            rm = d if r == 0 else d + 1
 
             p[m - 1] = 2 ** (t + 1)
             while p[m - 1] > 2 ** t:
                 z, y0 = self.__generate_z(y0, c, rm)
-                left_part = math.ceil(2 ** (t_list[m - 1] - 1) / p[m])
-                right_part = math.floor((2 ** (t_list[m - 1] - 1) * z) / (p[m] * 2 ** (16 * rm)))
+
+                left_d, left_r = divmod(2 ** (t_list[m - 1] - 1), p[m])
+                left_part = left_d if left_r == 0 else left_d + 1
+
+                right_d, right_r = divmod(2 ** (t_list[m - 1] - 1) * z, p[m] * 2 ** (16 * rm))
+                right_part = right_d if right_r == 0 else right_d + 1
+
                 N = left_part + right_part
                 N = N if N % 2 == 0 else N + 1
 
@@ -110,7 +116,8 @@ class GOSTGenerator:
         return p[0], p[1]
 
 
-    def __c(self, p, q):
+    @staticmethod
+    def __c(p, q):
         f = 1
         while f == 1:
             d = random.randint(2, p - 2)
@@ -123,9 +130,10 @@ class GOSTGenerator:
         c = random.randint(0, 2 ** 16 - 1)
         p, q = self.__a(x0, c, t)
         alpha = self.__c(p, q)
-        return (p, q, alpha)
+        return p, q, alpha
+
 
 if __name__ == '__main__':
     generator = GOSTGenerator()
-    p, q ,a = generator.generate_p_q_a(510)
+    p, q, a = generator.generate_p_q_a(510)
     print(powmod(a, q, p) == 1)
