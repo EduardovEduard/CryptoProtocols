@@ -23,7 +23,7 @@ def generate(message):
         k = random.randint(2, q - 1)
         R = powmod(a, k, p)
         R_ = R % q
-        H = get_hash(message)
+        H = get_hash(message) % q
         S = (k * H + x * R_) % q
     return R_, S
 
@@ -32,16 +32,14 @@ def check(message, R, S):
     if R >= q or S >= q:
         return False
 
-    H = get_hash(message)
+    H = get_hash(message) % q
     v = powmod(H, q - 2, q)
     z1 = (S * v) % q
     z2 = ((q - R) * v) % q
     u = ((powmod(a, z1, p) * powmod(y, z2, p)) % p) % q
-    print(R)
-    print(u)
     return R == u
 
 
-message = "Hello world!"
+message = "Hello World" * 32
 R, S = generate(message)
 print(check(message, R, S))
