@@ -8,9 +8,9 @@ __author__ = 'ees'
 generator = GOSTGenerator()
 p, q, a = generator.generate_p_q_a(512)
 x = random.randint(1, q - 1)
-y = powmod(a, x, q)
+y = powmod(a, x, p)
 
-def getHash(message):
+def get_hash(message):
     message = message.encode()
     hasher = hashlib.sha256()
     hasher.update(message)
@@ -21,23 +21,26 @@ def generate(message):
     S = 0
     while S == 0:
         k = random.randint(2, q - 1)
-        R = powmod(a, k, p) % q
-        H = getHash(message)
-        S = (k * H + x * R) % q
-    return R, S
+        R = powmod(a, k, p)
+        R_ = R % q
+        H = get_hash(message)
+        S = (k * H + x * R_) % q
+    return R_, S
 
 
 def check(message, R, S):
     if R >= q or S >= q:
         return False
 
-    H = getHash(message)
-    H_inv = inverse(H, p)
-    Hy_inv = inverse(H * y, p)
-    R_check = (powmod(a, S, p) - )
+    H = get_hash(message)
+    v = powmod(H, q - 2, q)
+    z1 = (S * v) % q
+    z2 = ((q - R) * v) % q
+    u = ((powmod(a, z1, p) * powmod(y, z2, p)) % p) % q
     print(R)
-    print(R_check)
-    return R == R_check
+    print(u)
+    return R == u
+
 
 message = "Hello world!"
 R, S = generate(message)
