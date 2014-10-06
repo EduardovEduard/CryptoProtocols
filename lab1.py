@@ -117,7 +117,7 @@ class GOSTGenerator:
         """
         if c >= 2 ** 16 or c <= 0 or \
                         x0 >= 2 ** 16 or x0 <= 0:
-            return -1
+            raise RuntimeError("__a: Invalid arguments!")
 
         t_list, s = self.__calculate_t(t)
         p_s = self.__next_prime(t_list[s - 1])
@@ -191,5 +191,8 @@ class GOSTGenerator:
 
 if __name__ == '__main__':
     generator = GOSTGenerator()
-    p, q, a = generator.generate_p_q_a(510)
-    print(powmod(a, q, p) == 1)
+    p, q, a = generator.generate_p_q_a(512)
+    print("a ^ q mod q == 1: " + str(powmod(a, q, p) == 1))
+    print("p: " + str(p))
+    print("q: " + str(q))
+    print("a: " + str(a))
