@@ -42,7 +42,7 @@ class Gost1994Sign:
         z1 = (S * v) % self.q
         z2 = ((self.q - R) * v) % self.q
         u = ((powmod(self.a, z1, self.p) * powmod(self.y, z2, self.p)) % self.p) % self.q
-        return R == u
+        return u, R == u
 
 
 message = "Я тестовое сообщение" * 20
@@ -54,7 +54,10 @@ print('\ta = {}'.format(gen.a))
 
 R, S = gen.generate(message)
 
-print('\tR = {}'.format(R))
 print('\tS = {}'.format(S))
+print('\tR = {}'.format(R))
 
-print("Подпись действительна: {}".format(gen.check(message, R, S)))
+u, verified = gen.check(message, R, S)
+print('\tU = {}'.format(u))
+
+print("Подпись действительна: {}".format(verified ))
