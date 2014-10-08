@@ -47,5 +47,14 @@ class Gost1994Sign:
 
 message = "Я тестовое сообщение" * 20
 gen = Gost1994Sign()
+print('Сгенерированные параметры:')
+print('\tp = {}'.format(gen.p))
+print('\tq = {}'.format(gen.q))
+print('\ta = {}'.format(gen.a))
+
 R, S = gen.generate(message)
-print(gen.check(message, R, S))
+
+print('\tR = {}'.format(R))
+print('\tS = {}'.format(S))
+
+print("Подпись действительна: {}".format(gen.check(message, R, S)))
