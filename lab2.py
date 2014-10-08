@@ -1,45 +1,51 @@
 from lab1 import *
 import random
 import hashlib
-from Crypto.Util.number import *
 
 __author__ = 'ees'
 
-generator = GOSTGenerator()
-p, q, a = generator.generate_p_q_a(512)
-x = random.randint(1, q - 1)
-y = powmod(a, x, p)
+class Gost1994Sign:
 
-def get_hash(message):
-    message = message.encode()
-    hasher = hashlib.sha256()
-    hasher.update(message)
-    H = int(hasher.hexdigest(), 16)
-    return H
+    def __init__(self, generator=None, hash_function=None):
+        if generator is None:
+            self.generator = GOSTGenerator()
 
-def generate(message):
-    S = 0
-    while S == 0:
-        k = random.randint(2, q - 1)
-        R = powmod(a, k, p)
-        R_ = R % q
-        H = get_hash(message) % q
-        S = (k * H + x * R_) % q
-    return R_, S
+        self.p, self.q, self.a = self.generator.generate_p_q_a(512)
+        self.x = random.randint(1, self.q - 1)
+        self.y = powmod(self.a, self.x, self.p)
 
+    @staticmethod
+    def get_hash(message):
+        message = message.encode()
+        hasher = hashlib.sha256()
+        hasher.update(message)
+        H = int(hasher.hexdigest(), 16)
+        return H
 
-def check(message, R, S):
-    if R >= q or S >= q:
-        return False
-
-    H = get_hash(message) % q
-    v = powmod(H, q - 2, q)
-    z1 = (S * v) % q
-    z2 = ((q - R) * v) % q
-    u = ((powmod(a, z1, p) * powmod(y, z2, p)) % p) % q
-    return R == u
+    def generate(self, message):
+        S = 0
+        while S == 0:
+            k = random.randint(2, self.q - 1)
+            R = powmod(self.a, k, self.p)
+            R_ = R % self.q
+            H = self.get_hash(message) % self.q
+            S = (k * H + self.x * R_) % self.q
+        return R_, S
 
 
-message = "Hello World" * 32
-R, S = generate(message)
-print(check(message, R, S))
+    def check(self, message, R, S):
+        if R >= self.q or S >= self.q:
+            return False
+
+        H = self.get_hash(message) % self.q
+        v = powmod(H, self.q - 2, self.q)
+        z1 = (S * v) % self.q
+        z2 = ((self.q - R) * v) % self.q
+        u = ((powmod(self.a, z1, self.p) * powmod(self.y, z2, self.p)) % self.p) % self.q
+        return R == u
+
+
+message = "Я тестовое сообщение" * 20
+gen = Gost1994Sign()
+R, S = gen.generate(message)
+print(gen.check(message, R, S))
