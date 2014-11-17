@@ -6,7 +6,7 @@ __author__ = 'ees'
 
 class Gost1994Sign:
 
-    def __init__(self, generator=None, hash_function=None):
+    def __init__(self, generator=None):
         if generator is None:
             self.generator = GOSTGenerator()
 
