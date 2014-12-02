@@ -98,7 +98,7 @@ def compress(n, h, m):
     return Xor(Xor(E(L(P(S(Xor(h, n)))), m), h), m)
 
 
-def gostHash(message, initVector):
+def gostHash(message, initVector = IV):
     h = initVector
     N = np.zeros(512)
     sigma = np.zeros(512)
