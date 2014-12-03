@@ -41,3 +41,4 @@ def sign(d, message: np.array):
 
 
 def check(sign, message):
+    pass
