@@ -20,7 +20,6 @@ Pi8 = partial(Pi, 8)
 
 def Vec(n, x):
     # assert math.ceil(math.log2(x)) <= n, "{} > {}".format(math.log2(x), n)
-
     result = np.zeros(n, int)
     binary = list(reversed(bin(x)[2:]))
     for i in range(len(binary)):
@@ -40,7 +39,7 @@ def Int(n, x):
     num = 0
     for i, val in enumerate(reversed(x)):
         num += val * 2 ** i
-    return num
+    return int(num)
 
 
 Int8 = partial(Int, 8)
@@ -124,14 +123,13 @@ def gostHash(message, initVector = IV):
 
 
 def int_to_binary_array(x: int):
-    size = math.ceil(x.bit_length() / 8)
-    bytes = x.to_bytes(size, byteorder='big')
-    binary_strings = [bin(byte)[2:].rjust(8, '0') for byte in bytes]
+    size = x.bit_length()
+    result = [0] * size
 
-    nparrays = []
-    for string in binary_strings:
-        nparrays.append(np.array([int(a) for a in string]))
-    return np.concatenate(nparrays)
+    for i in range(size):
+        result[size - i - 1] = 1 if x & (1 << i) else 0
+
+    return np.array(result)
 
 
 def binary_array_to_int(x: np.array):
@@ -141,13 +139,13 @@ def binary_array_to_int(x: np.array):
     return int(sum)
 
 
-if __name__ == '__main__':
-    M = 323130393837363534333231303938373635343332313039383736353433323130393837363534333231303938373635343332313039383736353433323130
-    G = 323130393837363534333231303938373635343332313039383736353433323130393837363534333231303938373635343332313039383736353433323131
-
-    message, m = int_to_binary_array(M), int_to_binary_array(G)
-    h = gostHash(message, IV)
-    g = gostHash(m, IV)
-
-    print(binary_array_to_int(h))
-    print(binary_array_to_int(g))
+# if __name__ == '__main__':
+#     M = 323130393837363534333231303938373635343332313039383736353433323130393837363534333231303938373635343332313039383736353433323130
+#     G = 323130393837363534333231303938373635343332313039383736353433323130393837363534333231303938373635343332313039383736353433323131
+#
+#     message, m = int_to_binary_array(M), int_to_binary_array(G)
+#     h = gostHash(message, IV)
+#     g = gostHash(m, IV)
+#
+#     print(binary_array_to_int(h))
+#     print(binary_array_to_int(g))
