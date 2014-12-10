@@ -1,14 +1,13 @@
 __author__ = 'ees'
 
 import sys
-import os
 import json
 import random
 import pickle
 
 from lab3 import EllipticCurve
 from lab4 import sign, check
-from lab5 import int_to_binary_array, binary_array_to_int
+from lab5 import int_to_binary_array
 
 from PyQt4 import QtGui, QtCore
 
