@@ -19,11 +19,9 @@ Pi8 = partial(Pi, 8)
 
 
 def Vec(n, x):
-    # assert math.ceil(math.log2(x)) <= n, "{} > {}".format(math.log2(x), n)
     result = np.zeros(n, int)
-    binary = list(reversed(bin(x)[2:]))
-    for i in range(len(binary)):
-        result[result.size - i - 1] = int(binary[i])
+    for i in range(n):
+        result[n - i - 1] = 1 if x & (1 << i) else 0
     return result
 
 
@@ -36,10 +34,8 @@ A = np.array([np.array(list(reversed(Vec64(int(x, 16))))) for x in A_list])  # Ð
 
 def Int(n, x):
     assert x.size == n, "{} != {}".format(x.size, n)
-    num = 0
-    for i, val in enumerate(reversed(x)):
-        num += val * 2 ** i
-    return int(num)
+    vals = (val * 2 ** i for i, val in enumerate(reversed(x)))
+    return int(sum(vals))
 
 
 Int8 = partial(Int, 8)
@@ -69,9 +65,7 @@ def P(a):
     return np.concatenate(tau_i)
 
 
-# Bullshit
 def L(a):
-    assert len(a) == 512, "A must be of length 512"
     return a
 
 
